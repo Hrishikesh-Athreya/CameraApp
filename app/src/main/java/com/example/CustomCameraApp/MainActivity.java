@@ -1,9 +1,12 @@
 package com.example.CustomCameraApp;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -18,6 +21,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaScannerConnection;
+import android.media.ThumbnailUtils;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -32,6 +36,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,6 +44,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -54,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
     private Button takePictureButton;
     private TextureView textureView;
     private ImageView galleryImage;
+    private Button saveButton;
+    private ImageView previewImageView;
+    private ProgressBar progressBar;
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -73,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean mFlashSupported;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         takePictureButton = findViewById(R.id.btn_takepicture);
+        progressBar = findViewById(R.id.progress_bar);
         assert takePictureButton != null;
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -200,9 +211,18 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("dirrrrrr", "" + wallpaperDirectory.mkdirs());
                 wallpaperDirectory.mkdirs();
             }
-            final File f = new File(wallpaperDirectory, Calendar.getInstance()
-                    .getTimeInMillis() + ".jpg");
+            final File thumbnailDirectory = new File(
+                    Environment.getExternalStorageDirectory() + "/CustomThumbImage");
+            // have the object build the directory structure, if needed.
+            if (!thumbnailDirectory.exists()) {
+                Log.d("dirrrrrr", "" + thumbnailDirectory.mkdirs());
+                thumbnailDirectory.mkdirs();
+            }
+            String time = Long.toString(Calendar.getInstance().getTimeInMillis());
+            final File f = new File(wallpaperDirectory,time + ".jpg");
             f.createNewFile();
+            final File thumbF = new File(thumbnailDirectory,time + ".jpg");
+            thumbF.createNewFile();
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
@@ -212,9 +232,16 @@ public class MainActivity extends AppCompatActivity {
                         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
                         byte[] bytes = new byte[buffer.capacity()];
                         buffer.get(bytes);
+//                        ProgressDialog.show(MainActivity.this, "Loading", "Wait while loading...");
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setVisibility(View.VISIBLE);
+                            }
+                        });
+
                         save(bytes);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
                     } catch (IOException e) {
                         e.printStackTrace();
                     } finally {
@@ -232,11 +259,42 @@ public class MainActivity extends AppCompatActivity {
                                 new String[]{f.getPath()},
                                 new String[]{"image/jpeg"}, null);
                         output.close();
+                        createThumbNail(f);
                         Log.d("TAG", "File Saved::--->" + f.getAbsolutePath());
 
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
+                }
+
+                private void createThumbNail(File f) throws FileNotFoundException {
+                    int THUMBSIZE = 64;
+                    Bitmap thumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(f.getPath()),
+                            THUMBSIZE, THUMBSIZE);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    thumbImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+                    OutputStream output = new FileOutputStream(thumbF);
+                    try {
+                        output.write(byteArray);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    MediaScannerConnection.scanFile(getBaseContext(),
+                            new String[]{f.getPath()},
+                            new String[]{"image/jpeg"}, null);
+                    try {
+                        output.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    thumbImage.recycle();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
                 }
             };
             reader.setOnImageAvailableListener(readerListener, mBackgroundHandler);

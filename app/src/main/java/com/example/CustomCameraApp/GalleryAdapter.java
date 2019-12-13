@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +21,14 @@ import java.util.ArrayList;
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
     private ArrayList<File> galleryList;
     private Context context;
+    private OnImageClickListener mOnImageClickListener;
+    private final String path = Environment.getExternalStorageDirectory() + "/CustomImage/";
 
-    public GalleryAdapter(Context context, ArrayList<File> galleryList) {
+
+    public GalleryAdapter(Context context, ArrayList<File> galleryList, OnImageClickListener onImageClickListener) {
         this.galleryList = galleryList;
         this.context = context;
+        this.mOnImageClickListener = onImageClickListener;
     }
 
     @Override
@@ -35,17 +41,14 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
     public void onBindViewHolder(GalleryAdapter.ViewHolder viewHolder, int i) {
         viewHolder.title.setText(galleryList.get(i).getName());
         viewHolder.img.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        final String currentFileName = galleryList.get(i).getName();
         viewHolder.img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "Image", Toast.LENGTH_SHORT).show();
+                mOnImageClickListener.onImageClick(path+currentFileName);
             }
         });
-        final int THUMBSIZE = 64;
-
-        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(galleryList.get(i).getPath()),
-                THUMBSIZE, THUMBSIZE);
-        viewHolder.img.setImageBitmap(ThumbImage);
+        viewHolder.img.setImageURI(Uri.parse(galleryList.get(i).getPath()));
 
     }
 
