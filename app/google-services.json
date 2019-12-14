@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "759520051269",
+    "firebase_url": "https://customcamera.firebaseio.com",
+    "project_id": "customcamera",
+    "storage_bucket": "customcamera.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:759520051269:android:60960f633e2e629fc7232c",
+        "android_client_info": {
+          "package_name": "com.example.CustomCameraApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "759520051269-lfldcjs1sn7g0s7rp9ldf2p0q7h5kbp4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.CustomCameraApp",
+            "certificate_hash": "133b4c88904c2926edde4252c455a2e5c9e782a5"
+          }
+        },
+        {
+          "client_id": "759520051269-io1chuhem6k7fj1fn9pl604njcq6913j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRfySwbN7UBqbP_uh4KHq5zLEHqxs2X4E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "759520051269-io1chuhem6k7fj1fn9pl604njcq6913j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

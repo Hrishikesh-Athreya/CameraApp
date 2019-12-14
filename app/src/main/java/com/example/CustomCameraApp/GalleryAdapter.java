@@ -74,6 +74,9 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
             @Override
             public void onClick(View v) {
                 mOnImageClickListener.onImageClick(path+currentFilename);
+                if (finalFileArray[i][3]=="1"){
+                    Toast.makeText(context,"Synced",Toast.LENGTH_SHORT).show();
+                }
             }
         });
         if(nextPathName!=null){
@@ -82,6 +85,9 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
                 @Override
                 public void onClick(View v) {
                     mOnImageClickListener.onImageClick(path+ finalNextPathName);
+                    if (finalFileArray[i][3]=="1"){
+                        Toast.makeText(context,"Synced",Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
         }
@@ -100,6 +106,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
     @Override
     public int getItemViewType(int position) {
         return position;
+    }
+
+    public void setData(String[][] finalFileArray) {
+        this.finalFileArray = finalFileArray;
+        notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">CustomCameraApp</string>
     <string name="take_picture">Take picture</string>
+    <string name="server_client_id">759520051269-lfldcjs1sn7g0s7rp9ldf2p0q7h5kbp4.apps.googleusercontent.com</string>
+
 </resources>
