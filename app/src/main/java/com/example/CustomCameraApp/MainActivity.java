@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean mFlashSupported;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
+    private Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -302,7 +303,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Toast.makeText(MainActivity.this, "Saved:" + f.getName(), Toast.LENGTH_SHORT).show();
+                    toast = Toast.makeText(MainActivity.this, "Saved:" + f.getName(), Toast.LENGTH_SHORT);
+                    toast.show();
                     createCameraPreview();
                 }
             };
@@ -419,6 +421,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         Log.e(TAG, "onPause");
         //closeCamera();
+        if (toast!=null){
+            toast.cancel();
+        }
         stopBackgroundThread();
         super.onPause();
     }

@@ -6,11 +6,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/imagegallery"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </androidx.recyclerview.widget.RecyclerView>
+        android:layout_height="match_parent"
+        android:backgroundTint="#FFFFFF"></androidx.recyclerview.widget.RecyclerView>
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

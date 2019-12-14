@@ -1,5 +1,10 @@
 apply plugin: 'com.android.application'
 
+ext {
+    play_services_version = "17.0.0"
+    support_version = "27.1.1"
+}
+
 android {
     compileSdkVersion 29
     defaultConfig {
@@ -27,4 +32,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation "com.google.android.gms:play-services-auth:$play_services_version"
+    implementation "com.google.android.gms:play-services-drive:$play_services_version"
+    implementation 'com.squareup.okio:okio:1.14.0'
 }
