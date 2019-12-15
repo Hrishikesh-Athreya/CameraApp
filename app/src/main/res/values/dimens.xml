@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="Imageview_size">
+        160dp
+    </dimen>
+    <dimen name="sync_imageview">
+        24dp
+    </dimen>
+    <dimen name="clickBtn_height">
+        72dp
+    </dimen>
+    <dimen name="galleryBtn_height">
+        48dp
+    </dimen>
+</resources>

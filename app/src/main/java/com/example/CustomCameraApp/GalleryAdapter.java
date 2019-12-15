@@ -55,17 +55,17 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
         String nextPathName = null;
             viewHolder.img1.setImageURI(Uri.parse(finalFileArray[i][0]));
             if (finalFileArray[i][3]!=null){
-                viewHolder.sync1.setImageResource(R.drawable.sync_successful);
+                viewHolder.sync1.setImageResource(R.drawable.ic_sync_successful);
             }else{
-                viewHolder.sync1.setImageResource(R.drawable.sync_failed);
+                viewHolder.sync1.setImageResource(R.drawable.ic_sync_failed);
             }
             if (finalFileArray[i][1] != null) {
                 viewHolder.img2.setImageURI(Uri.parse(finalFileArray[i][1]));
                 nextPathName = finalFileArray[i][1].substring(finalFileArray[i][1].lastIndexOf("/")+1);
                 if (finalFileArray[i][4]!=null){
-                    viewHolder.sync2.setImageResource(R.drawable.sync_successful);
+                    viewHolder.sync2.setImageResource(R.drawable.ic_sync_successful);
                 }else{
-                    viewHolder.sync2.setImageResource(R.drawable.sync_failed);
+                    viewHolder.sync2.setImageResource(R.drawable.ic_sync_failed);
                 }
             }
             if (finalFileArray[i][2]!=null) {
@@ -85,9 +85,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
             @Override
             public void onClick(View v) {
                 mOnImageClickListener.onImageClick(path+currentFilename);
-                if (finalFileArray[i][3]=="1"){
-                    Toast.makeText(context,"Synced",Toast.LENGTH_SHORT).show();
-                }
             }
         });
         if(nextPathName!=null){
@@ -96,9 +93,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
                 @Override
                 public void onClick(View v) {
                     mOnImageClickListener.onImageClick(path+ finalNextPathName);
-                    if (finalFileArray[i][3]=="1"){
-                        Toast.makeText(context,"Synced",Toast.LENGTH_SHORT).show();
-                    }
                 }
             });
         }

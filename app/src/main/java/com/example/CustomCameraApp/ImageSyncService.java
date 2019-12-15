@@ -1,5 +1,8 @@
 package com.example.CustomCameraApp;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -9,11 +12,14 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -30,13 +36,28 @@ public class ImageSyncService extends JobIntentService {
     StorageReference spaceRef;
     private DatabaseReference mDatabase;
     ArrayList<String> fullSyncedList;
+    NotificationCompat.Builder builder;
+    NotificationManagerCompat notificationManager;
+    private final String FULL_LIST_EXTRA = "fullList";
+    private final String FILES_LIST_EXTRA = "files list";
+    private final int NOTIFICATION_ID = 100;
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
+        notificationManager = NotificationManagerCompat.from(this);
+        builder = new NotificationCompat.Builder(this, "Custom Camera App");
+        builder.setContentTitle("Image Sync")
+                .setContentText("Sync in progress")
+                .setSmallIcon(R.drawable.ic_sync_successful)
+                .setPriority(NotificationCompat.PRIORITY_LOW);
+        int PROGRESS_MAX = 100;
+        int PROGRESS_CURRENT = 0;
+        builder.setProgress(PROGRESS_MAX, PROGRESS_CURRENT, false);
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
         storage = FirebaseStorage.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         storageRef = storage.getReference();
-        fullSyncedList = intent.getStringArrayListExtra("fullList");
-        for(String thumbnailPath:intent.getStringArrayListExtra("files list")) {
+        fullSyncedList = intent.getStringArrayListExtra(FULL_LIST_EXTRA);
+        for(String thumbnailPath:intent.getStringArrayListExtra(FILES_LIST_EXTRA)) {
             String imageName = thumbnailPath.substring(thumbnailPath.lastIndexOf("/")+1);
             String path = Environment.getExternalStorageDirectory() + "/CustomImage/";
             String imagePath = path + imageName;
@@ -44,6 +65,8 @@ public class ImageSyncService extends JobIntentService {
         }
         Collections.sort(fullSyncedList);
         mDatabase.child("images").setValue(fullSyncedList);
+        builder.setContentText("Images have been uploaded");
+        notificationManager.cancelAll();
         stopSelf();
     }
     private void uploadImage(String thumbnailPath,String imagePath) {
@@ -57,8 +80,13 @@ public class ImageSyncService extends JobIntentService {
             spaceRef.putBytes(byteArray).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Log.i("Thumbnail Upload", "onSuccess: Thumbnail uploaded successfully");
                     fullSyncedList.add(thumbnailPath.substring(thumbnailPath.lastIndexOf("/")+1));
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                    builder.setProgress((int)taskSnapshot.getTotalByteCount(), (int)taskSnapshot.getBytesTransferred(), false);
+                    notificationManager.notify(100, builder.build());
                 }
             });
             bitmap.recycle();
@@ -74,7 +102,6 @@ public class ImageSyncService extends JobIntentService {
             spaceRef.putBytes(byteArray).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Log.i("Image Upload", "onSuccess: Image uploaded successfully");
                 }
             });
             bitmap.recycle();

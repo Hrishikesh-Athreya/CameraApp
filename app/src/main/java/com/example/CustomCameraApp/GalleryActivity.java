@@ -34,21 +34,26 @@ public class GalleryActivity extends AppCompatActivity implements OnImageClickLi
     private ImageView fullImageView;
     Boolean isPictureFullScreen = false;
     private TreeMap<Integer,Boolean> datesMap = new TreeMap<>();
-    final String path = Environment.getExternalStorageDirectory() + "/CustomThumbImage/";
     String[][] fileArray;
     String[][] finalFileArray;
     DatabaseReference mDatabase;
     ArrayList<String> syncFilesArray;
     ArrayList<String> syncedFiles;
     ArrayList<String> fullSyncedList;
+
+    final String path = Environment.getExternalStorageDirectory() + "/CustomThumbImage/";
+    final String NO_INTERNET_TOAST = "No internet available";
+    final String ALL_IMAGES_UPLOADED_TOAST = "All images have been uploaded";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().setTitle("Gallery");
         setContentView(R.layout.activity_gallery);
         recyclerView = findViewById(R.id.imagegallery);
         fullImageView = findViewById(R.id.fullImage);
         recyclerView.setHasFixedSize(true);
-
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -81,7 +86,7 @@ public class GalleryActivity extends AppCompatActivity implements OnImageClickLi
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                System.out.println(databaseError.getMessage());
             }
         });
     }
@@ -190,7 +195,7 @@ public class GalleryActivity extends AppCompatActivity implements OnImageClickLi
             System.out.println(syncFilesArray.size());
             if (isNetworkAvailable()){
                 if (syncFilesArray.size()==0){
-                    Toast.makeText(GalleryActivity.this,"All images have been uploaded",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GalleryActivity.this,ALL_IMAGES_UPLOADED_TOAST,Toast.LENGTH_SHORT).show();
                 }else{
                     Intent intent = new Intent(GalleryActivity.this, ImageSyncService.class);
                     intent.putExtra("files list", syncFilesArray);
@@ -201,7 +206,7 @@ public class GalleryActivity extends AppCompatActivity implements OnImageClickLi
                     startService(intent);
                 }
             }else{
-                Toast.makeText(GalleryActivity.this,"No internet available",Toast.LENGTH_SHORT).show();
+                Toast.makeText(GalleryActivity.this,NO_INTERNET_TOAST,Toast.LENGTH_SHORT).show();
             }
 
         }
