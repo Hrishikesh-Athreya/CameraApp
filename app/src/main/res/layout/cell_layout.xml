@@ -12,29 +12,51 @@
         android:textColor="#000000"
         android:visibility="gone"
         ></TextView>
-
+<FrameLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/timeTextView"
+    android:layout_marginRight="16dp"
+    android:layout_marginLeft="12dp"
+    android:layout_marginTop="8dp"
+    >
     <ImageView
-            android:layout_below="@+id/timeTextView"
-            android:id="@+id/img1"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="12dp"
-        android:layout_marginTop="8dp"
-            />
+        android:id="@+id/img1"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        />
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="top|end"
+        android:id="@+id/sync1"
+        ></ImageView>
+</FrameLayout>
 
-        <ImageView
+<FrameLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/timeTextView"
+    android:layout_alignParentEnd="true"
+    android:layout_marginRight="12dp"
+    android:layout_marginTop="8dp"
+    >
+    <ImageView
 
-            android:layout_below="@+id/timeTextView"
-            android:layout_alignParentEnd="true"
-            android:id="@+id/img2"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:layout_marginRight="12dp"
-            android:layout_marginTop="8dp"
-            />
+        android:id="@+id/img2"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        />
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="top|end"
+        android:id="@+id/sync2"
+        ></ImageView>
+</FrameLayout>
+
 </RelativeLayout>

@@ -3,6 +3,7 @@ package com.example.CustomCameraApp;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
@@ -53,9 +54,19 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
     public void onBindViewHolder(GalleryAdapter.ViewHolder viewHolder, int i) {
         String nextPathName = null;
             viewHolder.img1.setImageURI(Uri.parse(finalFileArray[i][0]));
+            if (finalFileArray[i][3]!=null){
+                viewHolder.sync1.setImageResource(R.drawable.sync_successful);
+            }else{
+                viewHolder.sync1.setImageResource(R.drawable.sync_failed);
+            }
             if (finalFileArray[i][1] != null) {
                 viewHolder.img2.setImageURI(Uri.parse(finalFileArray[i][1]));
                 nextPathName = finalFileArray[i][1].substring(finalFileArray[i][1].lastIndexOf("/")+1);
+                if (finalFileArray[i][4]!=null){
+                    viewHolder.sync2.setImageResource(R.drawable.sync_successful);
+                }else{
+                    viewHolder.sync2.setImageResource(R.drawable.sync_failed);
+                }
             }
             if (finalFileArray[i][2]!=null) {
                 if (Integer.parseInt(finalFileArray[i][2]) == 0) {
@@ -117,13 +128,16 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
         private ImageView img1;
         private ImageView img2;
         private TextView timeTextView;
+        private ImageView sync1;
+        private ImageView sync2;
 
         public ViewHolder(View view) {
             super(view);
             img1 = view.findViewById(R.id.img1);
             img2 = view.findViewById(R.id.img2);
             timeTextView = view.findViewById(R.id.timeTextView);
-
+            sync1 = view.findViewById(R.id.sync1);
+            sync2 = view.findViewById(R.id.sync2);
         }
     }
 }

@@ -25,27 +25,25 @@ import java.util.Collections;
 
 public class ImageSyncService extends JobIntentService {
 
-    private static final int JOB_ID = 102;
-    private ArrayList<String> syncedImages;
     FirebaseStorage storage;
     StorageReference storageRef;
     StorageReference spaceRef;
     private DatabaseReference mDatabase;
+    ArrayList<String> fullSyncedList;
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
         storage = FirebaseStorage.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         storageRef = storage.getReference();
-        syncedImages = new ArrayList<>();
-
-        for(String thumbnailPath:intent.getStringArrayExtra("files list")) {
+        fullSyncedList = intent.getStringArrayListExtra("fullList");
+        for(String thumbnailPath:intent.getStringArrayListExtra("files list")) {
             String imageName = thumbnailPath.substring(thumbnailPath.lastIndexOf("/")+1);
             String path = Environment.getExternalStorageDirectory() + "/CustomImage/";
             String imagePath = path + imageName;
             uploadImage(thumbnailPath,imagePath);
         }
-        Collections.sort(syncedImages);
-        mDatabase.child("images").setValue(syncedImages);
+        Collections.sort(fullSyncedList);
+        mDatabase.child("images").setValue(fullSyncedList);
         stopSelf();
     }
     private void uploadImage(String thumbnailPath,String imagePath) {
@@ -60,7 +58,7 @@ public class ImageSyncService extends JobIntentService {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     Log.i("Thumbnail Upload", "onSuccess: Thumbnail uploaded successfully");
-                    syncedImages.add(thumbnailPath.substring(thumbnailPath.lastIndexOf("/")+1));
+                    fullSyncedList.add(thumbnailPath.substring(thumbnailPath.lastIndexOf("/")+1));
                 }
             });
             bitmap.recycle();

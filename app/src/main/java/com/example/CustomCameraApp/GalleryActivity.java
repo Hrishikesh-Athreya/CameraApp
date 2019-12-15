@@ -4,7 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -12,6 +16,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,9 +38,9 @@ public class GalleryActivity extends AppCompatActivity implements OnImageClickLi
     String[][] fileArray;
     String[][] finalFileArray;
     DatabaseReference mDatabase;
-    String[] syncFilesArray;
+    ArrayList<String> syncFilesArray;
     ArrayList<String> syncedFiles;
-
+    ArrayList<String> fullSyncedList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,20 +60,22 @@ public class GalleryActivity extends AppCompatActivity implements OnImageClickLi
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()){
                         syncedFiles = (ArrayList<String>)dataSnapshot.getValue();
+                        fullSyncedList = (ArrayList<String>)dataSnapshot.getValue();
                         for(int i=0;i<finalFileArray.length;i++){
                             String currentImageName = finalFileArray[i][0].substring(finalFileArray[i][0].lastIndexOf("/")+1);
                             if (syncedFiles.contains(currentImageName)){
                                 finalFileArray[i][3] = "1";
+                                syncFilesArray.remove(finalFileArray[i][0]);
                             }
                             if(finalFileArray[i][1]!=null){
                                 String secondImageName = finalFileArray[i][1].substring(finalFileArray[i][1].lastIndexOf("/")+1);
                                 if (syncedFiles.contains(secondImageName)){
                                     finalFileArray[i][4] = "1";
+                                    syncFilesArray.remove(finalFileArray[i][1]);
                                 }
                             }
                         }
                         adapter.setData(finalFileArray);
-                        System.out.println(finalFileArray[0][3]);
                     }
             }
 
@@ -82,12 +90,26 @@ public class GalleryActivity extends AppCompatActivity implements OnImageClickLi
 
         ArrayList<File> files = new ArrayList<>();
         File f = new File(path);
-        File[] file = f.listFiles();
-        syncFilesArray = new String[file.length];
+
+        File[] fileOrdering = f.listFiles();
+        File[] file = new File[fileOrdering.length];
+        ArrayList<String> fileOrderingNames = new ArrayList<>();
+        for (File a : fileOrdering){
+            fileOrderingNames.add(a.getName());
+        }
+        Collections.sort(fileOrderingNames);
+        Collections.reverse(fileOrderingNames);
+        int l=0;
+        for (String names:fileOrderingNames){
+            String filepath = path + names;
+            file[l] = new File(filepath);
+            l++;
+        }
+        syncFilesArray = new ArrayList<>();
         fileArray = new String[file.length][5];
         for (int i=0; i < file.length; i++)
         {
-            syncFilesArray[i] = file[i].getPath();
+            syncFilesArray.add(file[i].getPath());
             File file1 = new File(file[i].getPath());
             files.add(file1);
             long total_time = Calendar.getInstance().getTimeInMillis() - file1.lastModified();
@@ -96,9 +118,6 @@ public class GalleryActivity extends AppCompatActivity implements OnImageClickLi
                 datesMap.put(hours,false);
             }
         }
-        System.out.println("Datesmap "+datesMap);
-        Collections.reverse(files);
-
         for (int i=0;i<files.size();i++){
             File currentFile = files.get(i);
             long total_time = current_time - currentFile.lastModified();
@@ -168,44 +187,31 @@ public class GalleryActivity extends AppCompatActivity implements OnImageClickLi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_sync) {
-            Intent intent = new Intent(GalleryActivity.this, ImageSyncService.class);
-            intent.putExtra("files list", syncFilesArray);
-            startService(intent);
-//                List<AuthUI.IdpConfig> providers = Arrays.asList(
-//                        new AuthUI.IdpConfig.GoogleBuilder().build());
-//
-//// Create and launch sign-in intent
-//                startActivityForResult(
-//                        AuthUI.getInstance()
-//                                .createSignInIntentBuilder()
-//                                .setAvailableProviders(providers)
-//                                .build(),
-//                        RC_SIGN_IN);
-        }// If we got here, the user's action was not recognized.
-        // Invoke the superclass to handle it.
+            System.out.println(syncFilesArray.size());
+            if (isNetworkAvailable()){
+                if (syncFilesArray.size()==0){
+                    Toast.makeText(GalleryActivity.this,"All images have been uploaded",Toast.LENGTH_SHORT).show();
+                }else{
+                    Intent intent = new Intent(GalleryActivity.this, ImageSyncService.class);
+                    intent.putExtra("files list", syncFilesArray);
+                    if(fullSyncedList==null){
+                        fullSyncedList = new ArrayList<>();
+                    }
+                    intent.putExtra("fullList",fullSyncedList);
+                    startService(intent);
+                }
+            }else{
+                Toast.makeText(GalleryActivity.this,"No internet available",Toast.LENGTH_SHORT).show();
+            }
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        if (requestCode == RC_SIGN_IN) {
-//            IdpResponse response = IdpResponse.fromResultIntent(data);
-//
-//            if (resultCode == RESULT_OK) {
-//                // Successfully signed in
-//                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//                Toast.makeText(GalleryActivity.this,"Login successful", Toast.LENGTH_SHORT).show();
-//                // ...
-//            } else {
-//                Toast.makeText(GalleryActivity.this,"Login failed", Toast.LENGTH_SHORT).show();
-//                // Sign in failed. If response is null the user canceled the
-//                // sign-in flow using the back button. Otherwise check
-//                // response.getError().getErrorCode() and handle the error.
-//                // ...
-//            }
-//        }
-//    }
+private boolean isNetworkAvailable() {
+    ConnectivityManager connectivityManager
+            = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+}
 }
